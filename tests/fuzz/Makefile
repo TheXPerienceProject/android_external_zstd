@@ -1,5 +1,5 @@
 # ################################################################
-# Copyright (c) Facebook, Inc.
+# Copyright (c) 2016-2020, Facebook, Inc.
 # All rights reserved.
 #
 # This source code is licensed under both the BSD-style license (found in the
@@ -25,11 +25,10 @@ CORPORA_URL_PREFIX:=https://github.com/facebook/zstd/releases/download/fuzz-corp
 
 ZSTDDIR = ../../lib
 PRGDIR = ../../programs
-CONTRIBDIR = ../../contrib
 
 FUZZ_CPPFLAGS := -I$(ZSTDDIR) -I$(ZSTDDIR)/common -I$(ZSTDDIR)/compress \
 	-I$(ZSTDDIR)/dictBuilder -I$(ZSTDDIR)/deprecated -I$(ZSTDDIR)/legacy \
-	-I$(CONTRIBDIR)/seekable_format -I$(PRGDIR) -DZSTD_MULTITHREAD -DZSTD_LEGACY_SUPPORT=1 $(CPPFLAGS)
+	-I$(PRGDIR) -DZSTD_MULTITHREAD -DZSTD_LEGACY_SUPPORT=1 $(CPPFLAGS)
 FUZZ_EXTRA_FLAGS := -Wall -Wextra -Wcast-qual -Wcast-align -Wshadow \
 	-Wstrict-aliasing=1 -Wswitch-enum -Wdeclaration-after-statement \
 	-Wstrict-prototypes -Wundef \
@@ -46,9 +45,6 @@ FUZZ_ROUND_TRIP_FLAGS := -DFUZZING_ASSERT_VALID_SEQUENCE
 
 FUZZ_HEADERS := fuzz_helpers.h fuzz.h zstd_helpers.h fuzz_data_producer.h
 FUZZ_SRC := $(PRGDIR)/util.c ./fuzz_helpers.c ./zstd_helpers.c ./fuzz_data_producer.c
-
-SEEKABLE_HEADERS = $(CONTRIBDIR)/seekable_format/zstd_seekable.h
-SEEKABLE_OBJS = $(CONTRIBDIR)/seekable_format/zstdseek_compress.c $(CONTRIBDIR)/seekable_format/zstdseek_decompress.c
 
 ZSTDCOMMON_SRC := $(ZSTDDIR)/common/*.c
 ZSTDCOMP_SRC   := $(ZSTDDIR)/compress/*.c
@@ -102,8 +98,7 @@ FUZZ_TARGETS :=       \
 	dictionary_stream_round_trip \
 	decompress_dstSize_tooSmall \
 	fse_read_ncount \
-	sequence_compression_api \
-	seekable_roundtrip
+	sequence_compression_api
 
 all: libregression.a $(FUZZ_TARGETS)
 
@@ -196,9 +191,6 @@ fse_read_ncount: $(FUZZ_HEADERS) $(FUZZ_ROUND_TRIP_OBJ) rt_fuzz_fse_read_ncount.
 
 sequence_compression_api: $(FUZZ_HEADERS) $(FUZZ_ROUND_TRIP_OBJ) rt_fuzz_sequence_compression_api.o
 	$(CXX) $(FUZZ_TARGET_FLAGS) $(FUZZ_ROUND_TRIP_OBJ) rt_fuzz_sequence_compression_api.o $(LIB_FUZZING_ENGINE) -o $@
-
-seekable_roundtrip: $(FUZZ_HEADERS) $(SEEKABLE_HEADERS) $(FUZZ_ROUND_TRIP_OBJ) $(SEEKABLE_OBJS)  rt_fuzz_seekable_roundtrip.o
-	$(CXX) $(FUZZ_TARGET_FLAGS) $(FUZZ_ROUND_TRIP_OBJ) $(SEEKABLE_OBJS) rt_fuzz_seekable_roundtrip.o $(LIB_FUZZING_ENGINE) -o $@
 
 libregression.a: $(FUZZ_HEADERS) $(PRGDIR)/util.h $(PRGDIR)/util.c d_fuzz_regression_driver.o
 	$(AR) $(FUZZ_ARFLAGS) $@ d_fuzz_regression_driver.o

@@ -17,8 +17,7 @@ zstd_programs_sources = [join_paths(zstd_rootdir, 'programs/zstdcli.c'),
   join_paths(zstd_rootdir, 'programs/benchfn.c'),
   join_paths(zstd_rootdir, 'programs/benchzstd.c'),
   join_paths(zstd_rootdir, 'programs/datagen.c'),
-  join_paths(zstd_rootdir, 'programs/dibio.c'),
-  join_paths(zstd_rootdir, 'programs/zstdcli_trace.c')]
+  join_paths(zstd_rootdir, 'programs/dibio.c')]
 
 zstd_c_args = libzstd_debug_cflags
 if use_multi_thread
@@ -74,7 +73,7 @@ zstd_frugal_sources = [join_paths(zstd_rootdir, 'programs/zstdcli.c'),
 executable('zstd-frugal',
   zstd_frugal_sources,
   dependencies: libzstd_dep,
-  c_args: [ '-DZSTD_NOBENCH', '-DZSTD_NODICT', '-DZSTD_NOTRACE' ],
+  c_args: [ '-DZSTD_NOBENCH', '-DZSTD_NODICT' ],
   install: true)
 
 install_data(join_paths(zstd_rootdir, 'programs/zstdgrep'),

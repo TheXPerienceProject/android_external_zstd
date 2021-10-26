@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -23,13 +23,9 @@
 /* Unix Large Files support (>4GB) */
 #define _FILE_OFFSET_BITS 64
 #if (defined(__sun__) && (!defined(__LP64__)))   /* Sun Solaris 32-bits requires specific definitions */
-#  ifndef _LARGEFILE_SOURCE
 #  define _LARGEFILE_SOURCE
-#  endif
 #elif ! defined(__LP64__)                        /* No point defining Large file for 64 bit */
-#  ifndef _LARGEFILE64_SOURCE
 #  define _LARGEFILE64_SOURCE
-#  endif
 #endif
 
 
@@ -41,19 +37,18 @@
 #include <stdio.h>         /* fprintf, fopen, ftello64 */
 #include <time.h>          /* clock */
 
-#ifndef ZDICT_STATIC_LINKING_ONLY
-#  define ZDICT_STATIC_LINKING_ONLY
-#endif
-#define HUF_STATIC_LINKING_ONLY
-
 #include "../common/mem.h"           /* read */
 #include "../common/fse.h"           /* FSE_normalizeCount, FSE_writeNCount */
+#define HUF_STATIC_LINKING_ONLY
 #include "../common/huf.h"           /* HUF_buildCTable, HUF_writeCTable */
 #include "../common/zstd_internal.h" /* includes zstd.h */
 #include "../common/xxhash.h"        /* XXH64 */
-#include "../compress/zstd_compress_internal.h" /* ZSTD_loadCEntropy() */
-#include "../zdict.h"
 #include "divsufsort.h"
+#ifndef ZDICT_STATIC_LINKING_ONLY
+#  define ZDICT_STATIC_LINKING_ONLY
+#endif
+#include "zdict.h"
+#include "../compress/zstd_compress_internal.h" /* ZSTD_loadCEntropy() */
 
 
 /*-*************************************
@@ -972,11 +967,16 @@ static size_t ZDICT_addEntropyTablesFromBuffer_advanced(
     return MIN(dictBufferCapacity, hSize+dictContentSize);
 }
 
+/* Hidden declaration for dbio.c */
+size_t ZDICT_trainFromBuffer_unsafe_legacy(
+                            void* dictBuffer, size_t maxDictSize,
+                            const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples,
+                            ZDICT_legacy_params_t params);
 /*! ZDICT_trainFromBuffer_unsafe_legacy() :
-*   Warning : `samplesBuffer` must be followed by noisy guard band !!!
+*   Warning : `samplesBuffer` must be followed by noisy guard band.
 *   @return : size of dictionary, or an error code which can be tested with ZDICT_isError()
 */
-static size_t ZDICT_trainFromBuffer_unsafe_legacy(
+size_t ZDICT_trainFromBuffer_unsafe_legacy(
                             void* dictBuffer, size_t maxDictSize,
                             const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples,
                             ZDICT_legacy_params_t params)
