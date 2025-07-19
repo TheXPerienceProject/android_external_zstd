@@ -52,7 +52,7 @@ jobs:
         cd ..
 
     - name: Publish zstd-$VERSION-${{matrix.ziparch}}.zip
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # tag=v4.3.1
+      uses: actions/upload-artifact@de65e23aa2b7e23d713bb51fbfcb6d502f8667d8 # tag=v4.3.1
       with:
         path: ${{ github.workspace }}/zstd-${{ github.ref_name }}-${{matrix.ziparch}}.zip
         name: zstd-${{ github.ref_name }}-${{matrix.ziparch}}.zip
